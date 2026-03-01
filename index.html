@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MFactory AI - 智能制造投资分析助手</title>
+    <meta name="description" content="AI驱动的制造业公司投资分析工具，5分钟生成深度研究报告">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .loading {
+            display: none;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-industry text-white text-xl"></i>
+                </div>
+                <span class="text-2xl font-bold text-gray-900">MFactory AI</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="#features" class="text-gray-700 hover:text-blue-600 font-medium">功能</a>
+                <a href="#pricing" class="text-gray-700 hover:text-blue-600 font-medium">定价</a>
+                <a href="#try" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition">立即试用</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 头部英雄区域 -->
+    <header class="gradient-bg text-white">
+        <div class="max-w-6xl mx-auto px-4 py-20 text-center">
+            <h1 class="text-5xl font-bold mb-6 leading-tight">
+                AI驱动，深度分析<br>
+                <span class="text-blue-200">智能制造投资机会</span>
+            </h1>
+            <p class="text-xl mb-10 max-w-3xl mx-auto text-blue-100">
+                上传制造业公司财报，或输入股票代码，5分钟内生成专业投资分析报告。
+            </p>
+            
+            <div id="try" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">立即体验 AI 分析</h3>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        输入制造业公司股票代码
+                    </label>
+                    <div class="flex gap-3">
+                        <input 
+                            id="stockCode" 
+                            type="text" 
+                            placeholder="例如：300124（汇川技术）、002747（埃斯顿）、600519（贵州茅台）"
+                            class="flex-1 px-5 py-3 border border-gray-300 rounded-xl focus:ring-3 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                            value="300124"
+                        >
+                        <button 
+                            id="analyzeBtn" 
+                            class="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-purple-700 transition flex items-center gap-2"
+                        >
+                            <i class="fas fa-robot"></i>
+                            智能分析
+                        </button>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">
+                        支持 A股、港股、美股主要制造业公司
+                    </p>
+                </div>
+
+                <!-- 加载状态 -->
+                <div id="loading" class="loading mb-6">
+                    <div class="flex items-center justify-center space-x-3">
+                        <div class="w-6 h-6 border-3 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-gray-700 font-medium">AI正在分析中，请稍候...</span>
+                    </div>
+                </div>
+
+                <!-- 分析结果 -->
+                <div id="result" class="hidden fade-in">
+                    <div class="border-t border-gray-200 pt-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h4 id="companyName" class="text-xl font-bold text-gray-900">汇川技术 (300124)</h4>
+                                <div class="flex items-center mt-2">
+                                    <span id="stockPrice" class="text-2xl font-bold text-gray-900">68.50</span>
+                                    <span id="stockChange" class="ml-3 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">+2.3%</span>
+                                    <span class="ml-4 text-gray-600">今日收盘</span>
+                                </div>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+                                    <i class="fas fa-download"></i> 下载报告
+                                </button>
+                                <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-2">
+                                    <i class="fas fa-share"></i> 分享
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-gradient-to-r from-blue-50 to-gray-50 rounded-xl p-6">
+                            <div class="flex items-center mb-4">
+                                <i class="fas fa-brain text-blue-600 text-xl mr-3"></i>
+                                <h5 class="text-lg font-semibold text-gray-900">AI 投资分析摘要</h5>
+                            </div>
+                            <div id="analysisText" class="text-gray-700 space-y-4">
+                                <p>1. <strong>行业地位</strong>：汇川技术是中国工业自动化领域的龙头企业，在PLC、伺服系统、工业机器人等核心产品线市场份额持续提升，受益于制造业智能化升级趋势。</p>
+                                <p>2. <strong>财务表现</strong>：2025年Q3财报显示，营收同比增长28%，净利润增长32%。毛利率维持在40%以上，显示良好定价能力和成本控制。</p>
+                                <p>3. <strong>增长驱动</strong>：新能源汽车电控系统、工业机器人业务成为新增长点，分别同比增长45%和38%。公司在光伏、锂电等新兴行业渗透加速。</p>
+                                <p>4. <strong>风险提示</strong>：需关注原材料成本波动、下游制造业投资周期、以及国际竞争对手（西门子、ABB）的价格竞争。</p>
+                                <p>5. <strong>投资建议</strong>：当前估值处于行业合理水平（PE 32x），建议逢低配置，关注季度订单数据和机器人业务进展。</p>
+                            </div>
+                        </div>
+
+                        <!-- 关键指标 -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                            <div class="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                                <div class="text-sm text-gray-600 mb-1">市盈率(PE)</div>
+                                <div class="text-2xl font-bold text-gray-900">32.5x</div>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                                <div class="text-sm text-gray-600 mb-1">市净率(PB)</div>
+                                <div class="text-2xl font-bold text-gray-900">5.8x</div>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                                <div class="text-sm text-gray-600 mb-1">ROE</div>
+                                <div class="text-2xl font-bold text-green-600">18.2%</div>
+                            </div>
+                            <div class="bg-white p-4 rounded-lg border border-gray-200 text-center">
+                                <div class="text-sm text-gray-600 mb-1">股息率</div>
+                                <div class="text-2xl font-bold text-blue-600">1.2%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center">
+                    <p class="text-gray-600 text-sm">
+                        <i class="fas fa-shield-alt text-blue-500 mr-1"></i>
+                        数据来源：公开市场信息，分析仅供参考，不构成投资建议
+                    </p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 功能特点 -->
+    <section id="features" class="py-16 bg-white">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-12">核心功能</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="card-hover bg-gray-50 p-8 rounded-2xl border border-gray-200">
+                    <div class="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-file-invoice-dollar text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">财报智能分析</h3>
+                    <p class="text-gray-600">
+                        自动解析制造业公司财报，提取关键财务指标，AI生成投资亮点与风险提示，节省80%研究时间。
+                    </p>
+                </div>
+                <div class="card-hover bg-gray-50 p-8 rounded-2xl border border-gray-200">
+                    <div class="w-14 h-14 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">产业链可视化</h3>
+                    <p class="text-gray-600">
+                        构建制造业产业链图谱，分析上下游依赖关系，识别供应链风险与增长机会。
+                    </p>
+                </div>
+                <div class="card-hover bg-gray-50 p-8 rounded-2xl border border-gray-200">
+                    <div class="w-14 h-14 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-robot text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">AI投资观点</h3>
+                    <p class="text-gray-600">
+                        基于行业数据、政策动向、技术趋势，生成个性化投资观点，每日更新。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 定价 -->
+    <section id="pricing" class="py-16 bg-gradient-to-b from-gray-50 to-white">
+        <div class="max-w-6xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-4">简单透明定价</h2>
+            <p class="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
+                适合个人投资者、家族办公室、投资机构的分析需求
+            </p>
+            
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- 免费版 -->
+                <div class="bg-white rounded-2xl border border-gray-300 p-8 card-hover">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">探索版</h3>
+                        <p class="text-gray-600">适合个人投资者试用</p>
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex items-baseline">
+                            <span class="text-4xl font-bold text-gray-900">¥0</span>
+                            <span class="text-gray-600 ml-2">/ 月</span>
+                        </div>
+                        <p class="text-gray-600 mt-2">永久免费</p>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>每月3次AI分析</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>基础财务指标</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>标准报告模板</span>
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <i class="fas fa-times-circle mr-3"></i>
+                            <span>行业深度分析</span>
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 border-2 border-blue-600 text-blue-600 font-medium rounded-xl hover:bg-blue-50 transition">
+                        开始免费试用
+                    </button>
+                </div>
+
+                <!-- 专业版 -->
+                <div class="bg-white rounded-2xl border-2 border-blue-500 shadow-xl p-8 card-hover transform scale-105">
+                    <div class="mb-6">
+                        <div class="inline-block px-4 py-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-full mb-3">
+                            最受欢迎
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">专业版</h3>
+                        <p class="text-gray-600">适合活跃个人投资者</p>
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex items-baseline">
+                            <span class="text-4xl font-bold text-gray-900">¥299</span>
+                            <span class="text-gray-600 ml-2">/ 月</span>
+                        </div>
+                        <p class="text-gray-600 mt-2">年付节省20%</p>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>每月50次AI分析</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>行业深度报告</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>产业链图谱</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>API基础访问</span>
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-medium rounded-xl hover:from-blue-700 hover:to-blue-800 transition">
+                        立即订阅
+                    </button>
+                </div>
+
+                <!-- 机构版 -->
+                <div class="bg-white rounded-2xl border border-gray-300 p-8 card-hover">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">机构版</h3>
+                        <p class="text-gray-600">适合家族办公室/投资机构</p>
+                    </div>
+                    <div class="mb-6">
+                        <div class="flex items-baseline">
+                            <span class="text-4xl font-bold text-gray-900">定制</span>
+                        </div>
+                        <p class="text-gray-600 mt-2">按需报价</p>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>无限次AI分析</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>私有化部署</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>定制数据源接入</span>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 mr-3"></i>
+                            <span>专属技术团队支持</span>
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 border-2 border-gray-800 text-gray-800 font-medium rounded-xl hover:bg-gray-50 transition">
+                        联系我们
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-8 md:mb-0">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-industry text-white text-xl"></i>
+                        </div>
+                        <span class="text-2xl font-bold">MFactory AI</span>
+                    </div>
+                    <p class="text-gray-400 max-w-md">
+                        AI驱动的智能制造投资分析平台，帮助投资者深度理解制造业公司价值。
+                    </p>
+                </div>
+                <div class="text-center md:text-right">
+                    <p class="text-gray-400 mb-4">© 2026 MFactory AI. 保留所有权利。</p>
+                    <p class="text-gray-500 text-sm">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 mr-1"></i>
+                        投资有风险，本平台分析仅供参考，不构成投资建议。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 模拟数据
+        const mockData = {
+            '300124': {
+                name: '汇川技术',
+                analysis: `
+                    <p>1. <strong>行业地位</strong>：汇川技术是中国工业自动化领域的龙头企业，在PLC、伺服系统、工业机器人等核心产品线市场份额持续提升，受益于制造业智能化升级趋势。</p>
+                    <p>2. <strong>财务表现</strong>：2025年Q3财报显示，营收同比增长28%，净利润增长32%。毛利率维持在40%以上，显示良好定价能力和成本控制。</p>
+                    <p>3. <strong>增长驱动</strong>：新能源汽车电控系统、工业机器人业务成为新增长点，分别同比增长45%和38%。公司在光伏、锂电等新兴行业渗透加速。</p>
+                    <p>4. <strong>风险提示</strong>：需关注原材料成本波动、下游制造业投资周期、以及国际竞争对手（西门子、ABB）的价格竞争。</p>
+                    <p>5. <strong>投资建议</strong>：当前估值处于行业合理水平（PE 32x），建议逢低配置，关注季度订单数据和机器人业务进展。</p>
+                `,
+                price: '68.50',
+                change: '+2.3%',
+                changeClass: 'bg-green-100 text-green-800'
+            },
+            '002747': {
+                name: '埃斯顿',
+                analysis: `
+                    <p>1. <strong>核心优势</strong>：埃斯顿是国产工业机器人领先企业，在焊接、搬运机器人领域技术积累深厚，国产替代空间广阔。</p>
+                    <p>2. <strong>财务亮点</strong>：2025年上半年营收增长35%，机器人业务占比提升至65%，毛利率环比改善至38%。</p>
+                    <p>3. <strong>市场机遇</strong>：受益于制造业自动化率提升、劳动力成本上升，工业机器人行业年复合增长率预计超过20%。</p>
+                    <p>4. <strong>关注要点</strong>：需跟踪公司海外市场拓展进展、核心零部件国产化率、以及大客户集中度风险。</p>
+                    <p>5. <strong>估值分析</strong>：当前PE 40x略高于行业平均，反映市场对其成长性的溢价，建议等待回调布局。</p>
+                `,
+                price: '42.80',
+                change: '+1.5%',
+                changeClass: 'bg-green-100 text-green-800'
+            },
+            '600519': {
+                name: '贵州茅台',
+                analysis: `
+                    <p>1. <strong>护城河</strong>：茅台拥有不可复制的品牌、地理和工艺壁垒，高端白酒定价权稳固，是典型的价值投资标的。</p>
+                    <p>2. <strong>财务稳健</strong>：ROE持续保持在30%以上，现金流充沛，分红率稳定在50%左右，具备防御属性。</p>
+                    <p>3. <strong>增长挑战</strong>：高端白酒消费场景变化，年轻消费者偏好转变，需关注公司产品创新和渠道改革成效。</p>
+                    <p>4. <strong>估值水平</strong>：当前PE 28x处于历史中位数，在消费股中具备估值吸引力，但短期缺乏强劲催化剂。</p>
+                    <p>5. <strong>配置建议</strong>：适合作为核心持仓长期持有，关注批价走势和直营渠道占比提升。</p>
+                `,
+                price: '1850.00',
+                change: '-0.5%',
+                changeClass: 'bg-red-100 text-red-800'
+            },
+            '00700': {
+                name: '腾讯控股',
+                analysis: `
+                    <p>1. <strong>生态优势</strong>：腾讯拥有微信+QQ超级流量入口，游戏、社交、金融科技、云业务形成强大协同效应。</p>
+                    <p>2. <strong>业绩复苏</strong>：2025年游戏业务回暖，视频号商业化加速，广告收入恢复增长，云业务聚焦高质量客户。</p>
+                    <p>3. <strong>投资布局</strong>：投资组合价值超过1万亿人民币，涵盖互联网、金融科技、企业服务等多个赛道。</p>
+                    <p>4. <strong>监管环境</strong>：平台经济监管常态化，公司治理更加规范，有利于长期健康发展。</p>
+                    <p>5. <strong>投资视角</strong>：当前估值具备吸引力，港股通资金持续流入，建议分批配置，关注新游戏上线表现。</p>
+                `,
+                price: '385.20',
+                change: '+2.1%',
+                changeClass: 'bg-green-100 text-green-800'
+            }
+        };
+
+        // DOM元素
+        const stockCodeInput = document.getElementById('stockCode');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loadingDiv = document.getElementById('loading');
+        const resultDiv = document.getElementById('result');
+        const companyNameSpan = document.getElementById('companyName');
+        const stockPriceSpan = document.getElementById('stockPrice');
+        const stockChangeSpan = document.getElementById('stockChange');
+        const analysisTextDiv = document.getElementById('analysisText');
+
+        // 分析按钮点击事件
+        analyzeBtn.addEventListener('click', function() {
+            const code = stockCodeInput.value.trim();
+            
+            if (!code) {
+                alert('请输入股票代码');
+                return;
+            }
+            
+            // 显示加载状态
+            loadingDiv.style.display = 'block';
+            resultDiv.classList.add('hidden');
+            
+            // 模拟AI分析延迟
+            setTimeout(() => {
+                loadingDiv.style.display = 'none';
+                
+                if (mockData[code]) {
+                    const data = mockData[code];
+                    companyNameSpan.textContent = `${data.name} (${code})`;
+                    stockPriceSpan.textContent = data.price;
+                    stockChangeSpan.textContent = data.change;
+                    stockChangeSpan.className = `ml-3 px-3 py-1 ${data.changeClass} rounded-full text-sm font-medium`;
+                    analysisTextDiv.innerHTML = data.analysis;
+                    resultDiv.classList.remove('hidden');
+                    resultDiv.classList.add('fade-in');
+                    
+                    // 滚动到结果区域
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    // 如果没有该股票数据，使用第一个示例
+                    const firstCode = Object.keys(mockData)[0];
+                    const data = mockData[firstCode];
+                    companyNameSpan.textContent = `${data.name} (${firstCode})`;
+                    stockPriceSpan.textContent = data.price;
+                    stockChangeSpan.textContent = data.change;
+                    stockChangeSpan.className = `ml-3 px-3 py-1 ${data.changeClass} rounded-full text-sm font-medium`;
+                    analysisTextDiv.innerHTML = data.analysis;
+                    resultDiv.classList.remove('hidden');
+                    resultDiv.classList.add('fade-in');
+                    
+                    // 更新输入框
+                    stockCodeInput.value = firstCode;
+                    
+                    alert(`暂未找到股票代码 ${code} 的详细数据，已展示 ${firstCode} (${data.name}) 的分析示例。`);
+                }
+            }, 1500); // 1.5秒模拟AI分析时间
+        });
+
+        // 输入框回车键支持
+        stockCodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                analyzeBtn.click();
+            }
+        });
+
+        // 页面加载时自动分析示例股票
+        window.addEventListener('DOMContentLoaded', function() {
+            // 等待页面完全加载后自动分析
+            setTimeout(() => {
+                analyzeBtn.click();
+            }, 500);
+        });
+
+        // 平滑滚动到锚点
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
