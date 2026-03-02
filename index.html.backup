@@ -28,7 +28,6 @@
             from { opacity: 0; }
             to { opacity: 1; }
         }
-    <script src="js/main.js" defer></script>
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -348,4 +347,153 @@
         </div>
     </footer>
 
-<script src="js/main.js"></script></body></html>
+    <script>
+        // 模拟数据
+        const mockData = {
+            '300124': {
+                name: '汇川技术',
+                analysis: `
+                    <p>1. <strong>行业地位</strong>：汇川技术是中国工业自动化领域的龙头企业，在PLC、伺服系统、工业机器人等核心产品线市场份额持续提升，受益于制造业智能化升级趋势。</p>
+                    <p>2. <strong>财务表现</strong>：2025年Q3财报显示，营收同比增长28%，净利润增长32%。毛利率维持在40%以上，显示良好定价能力和成本控制。</p>
+                    <p>3. <strong>增长驱动</strong>：新能源汽车电控系统、工业机器人业务成为新增长点，分别同比增长45%和38%。公司在光伏、锂电等新兴行业渗透加速。</p>
+                    <p>4. <strong>风险提示</strong>：需关注原材料成本波动、下游制造业投资周期、以及国际竞争对手（西门子、ABB）的价格竞争。</p>
+                    <p>5. <strong>投资建议</strong>：当前估值处于行业合理水平（PE 32x），建议逢低配置，关注季度订单数据和机器人业务进展。</p>
+                `,
+                price: '68.50',
+                change: '+2.3%',
+                changeClass: 'bg-green-100 text-green-800'
+            },
+            '002747': {
+                name: '埃斯顿',
+                analysis: `
+                    <p>1. <strong>核心优势</strong>：埃斯顿是国产工业机器人领先企业，在焊接、搬运机器人领域技术积累深厚，国产替代空间广阔。</p>
+                    <p>2. <strong>财务亮点</strong>：2025年上半年营收增长35%，机器人业务占比提升至65%，毛利率环比改善至38%。</p>
+                    <p>3. <strong>市场机遇</strong>：受益于制造业自动化率提升、劳动力成本上升，工业机器人行业年复合增长率预计超过20%。</p>
+                    <p>4. <strong>关注要点</strong>：需跟踪公司海外市场拓展进展、核心零部件国产化率、以及大客户集中度风险。</p>
+                    <p>5. <strong>估值分析</strong>：当前PE 40x略高于行业平均，反映市场对其成长性的溢价，建议等待回调布局。</p>
+                `,
+                price: '42.80',
+                change: '+1.5%',
+                changeClass: 'bg-green-100 text-green-800'
+            },
+            '600519': {
+                name: '贵州茅台',
+                analysis: `
+                    <p>1. <strong>护城河</strong>：茅台拥有不可复制的品牌、地理和工艺壁垒，高端白酒定价权稳固，是典型的价值投资标的。</p>
+                    <p>2. <strong>财务稳健</strong>：ROE持续保持在30%以上，现金流充沛，分红率稳定在50%左右，具备防御属性。</p>
+                    <p>3. <strong>增长挑战</strong>：高端白酒消费场景变化，年轻消费者偏好转变，需关注公司产品创新和渠道改革成效。</p>
+                    <p>4. <strong>估值水平</strong>：当前PE 28x处于历史中位数，在消费股中具备估值吸引力，但短期缺乏强劲催化剂。</p>
+                    <p>5. <strong>配置建议</strong>：适合作为核心持仓长期持有，关注批价走势和直营渠道占比提升。</p>
+                `,
+                price: '1850.00',
+                change: '-0.5%',
+                changeClass: 'bg-red-100 text-red-800'
+            },
+            '00700': {
+                name: '腾讯控股',
+                analysis: `
+                    <p>1. <strong>生态优势</strong>：腾讯拥有微信+QQ超级流量入口，游戏、社交、金融科技、云业务形成强大协同效应。</p>
+                    <p>2. <strong>业绩复苏</strong>：2025年游戏业务回暖，视频号商业化加速，广告收入恢复增长，云业务聚焦高质量客户。</p>
+                    <p>3. <strong>投资布局</strong>：投资组合价值超过1万亿人民币，涵盖互联网、金融科技、企业服务等多个赛道。</p>
+                    <p>4. <strong>监管环境</strong>：平台经济监管常态化，公司治理更加规范，有利于长期健康发展。</p>
+                    <p>5. <strong>投资视角</strong>：当前估值具备吸引力，港股通资金持续流入，建议分批配置，关注新游戏上线表现。</p>
+                `,
+                price: '385.20',
+                change: '+2.1%',
+                changeClass: 'bg-green-100 text-green-800'
+            }
+        };
+
+        // DOM元素
+        const stockCodeInput = document.getElementById('stockCode');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loadingDiv = document.getElementById('loading');
+        const resultDiv = document.getElementById('result');
+        const companyNameSpan = document.getElementById('companyName');
+        const stockPriceSpan = document.getElementById('stockPrice');
+        const stockChangeSpan = document.getElementById('stockChange');
+        const analysisTextDiv = document.getElementById('analysisText');
+
+        // 分析按钮点击事件
+        analyzeBtn.addEventListener('click', function() {
+            const code = stockCodeInput.value.trim();
+            
+            if (!code) {
+                alert('请输入股票代码');
+                return;
+            }
+            
+            // 显示加载状态
+            loadingDiv.style.display = 'block';
+            resultDiv.classList.add('hidden');
+            
+            // 模拟AI分析延迟
+            setTimeout(() => {
+                loadingDiv.style.display = 'none';
+                
+                if (mockData[code]) {
+                    const data = mockData[code];
+                    companyNameSpan.textContent = `${data.name} (${code})`;
+                    stockPriceSpan.textContent = data.price;
+                    stockChangeSpan.textContent = data.change;
+                    stockChangeSpan.className = `ml-3 px-3 py-1 ${data.changeClass} rounded-full text-sm font-medium`;
+                    analysisTextDiv.innerHTML = data.analysis;
+                    resultDiv.classList.remove('hidden');
+                    resultDiv.classList.add('fade-in');
+                    
+                    // 滚动到结果区域
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    // 如果没有该股票数据，使用第一个示例
+                    const firstCode = Object.keys(mockData)[0];
+                    const data = mockData[firstCode];
+                    companyNameSpan.textContent = `${data.name} (${firstCode})`;
+                    stockPriceSpan.textContent = data.price;
+                    stockChangeSpan.textContent = data.change;
+                    stockChangeSpan.className = `ml-3 px-3 py-1 ${data.changeClass} rounded-full text-sm font-medium`;
+                    analysisTextDiv.innerHTML = data.analysis;
+                    resultDiv.classList.remove('hidden');
+                    resultDiv.classList.add('fade-in');
+                    
+                    // 更新输入框
+                    stockCodeInput.value = firstCode;
+                    
+                    alert(`暂未找到股票代码 ${code} 的详细数据，已展示 ${firstCode} (${data.name}) 的分析示例。`);
+                }
+            }, 1500); // 1.5秒模拟AI分析时间
+        });
+
+        // 输入框回车键支持
+        stockCodeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                analyzeBtn.click();
+            }
+        });
+
+        // 页面加载时自动分析示例股票
+        window.addEventListener('DOMContentLoaded', function() {
+            // 等待页面完全加载后自动分析
+            setTimeout(() => {
+                analyzeBtn.click();
+            }, 500);
+        });
+
+        // 平滑滚动到锚点
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

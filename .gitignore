@@ -1,0 +1,66 @@
+# 依赖目录
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 测试覆盖目录
+coverage/
+.nyc_output/
+
+# 构建产物
+dist/
+build/
+.out/
+.next/
+
+# 环境变量
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 日志文件
+logs/
+*.log
+
+# 临时文件
+tmp/
+temp/
+
+# 部署文件
+.deploy/
+.gh-pages/
+
+# 安全文件
+*.pem
+*.key
+*.crt
+
+# 文档生成
+docs/_build/
+
+# 性能测试报告
+lighthouse-report.json
+
+# 包锁文件（我们使用package-lock.json）
+yarn.lock
+pnpm-lock.yaml
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# Jest
+jest-cache/

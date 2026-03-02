@@ -1,0 +1,70 @@
+{
+  "name": "mfactory-ai",
+  "version": "1.0.0",
+  "description": "AI驱动的智能制造投资分析平台",
+  "main": "index.html",
+  "scripts": {
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "test:e2e": "cypress run",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "build": "npm run lint && npm run test",
+    "deploy": "npm run build && gh-pages -d .",
+    "start": "serve .",
+    "security": "npm audit",
+    "performance": "lighthouse http://localhost:3000 --output=json --output-path=./lighthouse-report.json"
+  },
+  "keywords": [
+    "智能制造",
+    "投资分析",
+    "AI",
+    "股票分析",
+    "金融科技"
+  ],
+  "author": "硅基战略局",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.0",
+    "cypress": "^12.0.0",
+    "lighthouse": "^10.0.0",
+    "serve": "^14.0.0",
+    "gh-pages": "^5.0.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "coverageThreshold": {
+      "global": {
+        "branches": 90,
+        "functions": 90,
+        "lines": 90,
+        "statements": 90
+      }
+    },
+    "collectCoverageFrom": [
+      "js/**/*.js",
+      "!js/vendor/**"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hefund/mfactory-ai.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hefund/mfactory-ai/issues"
+  },
+  "homepage": "https://hefund.github.io/mfactory-ai/",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "not dead"
+  ]
+}

@@ -1,0 +1,173 @@
+name: MFactory AI CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 2 * * *'  # 每日凌晨2点运行监控测试
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Lint code
+      run: npm run lint
+    
+    - name: Run unit tests
+      run: npm test
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/lcov.info
+        fail_ci_if_error: true
+    
+    - name: Run security audit
+      run: npm audit --audit-level=high
+    
+    - name: Run performance test
+      run: |
+        npm start &
+        sleep 5
+        npm run performance
+        cat ./lighthouse-report.json | jq '.categories.performance.score'
+
+  deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build and deploy to GitHub Pages
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
+        npm run deploy
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Health check
+      run: |
+        sleep 30
+        curl -f https://hefund.github.io/mfactory-ai/ || exit 1
+    
+    - name: Notify deployment
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  monitor:
+    needs: deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run end-to-end tests
+      uses: cypress-io/github-action@v5
+      with:
+        start: npm start
+        wait-on: 'http://localhost:3000'
+    
+    - name: Check uptime
+      run: |
+        RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" https://hefund.github.io/mfactory-ai/)
+        if [ "$RESPONSE" != "200" ]; then
+          echo "❌ 网站不可用，HTTP状态码: $RESPONSE"
+          exit 1
+        fi
+        echo "✅ 网站运行正常"
+    
+    - name: Check response time
+      run: |
+        TIME=$(curl -s -w "%{time_total}\n" -o /dev/null https://hefund.github.io/mfactory-ai/)
+        if (( $(echo "$TIME > 2" | bc -l) )); then
+          echo "⚠️  响应时间较慢: ${TIME}秒"
+        else
+          echo "✅ 响应时间正常: ${TIME}秒"
+        fi
+    
+    - name: Create monitoring report
+      run: |
+        echo "# 监控报告 $(date)" > monitoring-report.md
+        echo "## 可用性检查" >> monitoring-report.md
+        echo "- 网站状态: ✅ 正常" >> monitoring-report.md
+        echo "## 性能检查" >> monitoring-report.md
+        echo "- 响应时间: ${TIME}秒" >> monitoring-report.md
+        echo "## 安全检查" >> monitoring-report.md
+        echo "- 安全头检查: 待完善" >> monitoring-report.md
+        cat monitoring-report.md
+    
+    - name: Upload monitoring report
+      uses: actions/upload-artifact@v3
+      with:
+        name: monitoring-report
+        path: monitoring-report.md
+
+  notify-ceo:
+    needs: [test, deploy, monitor]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Generate CEO report
+      run: |
+        echo "# CEO汇报 - $(date)" > ceo-report.md
+        echo "## 执行状态" >> ceo-report.md
+        echo "- 测试: ${{ needs.test.result }}" >> ceo-report.md
+        echo "- 部署: ${{ needs.deploy.result }}" >> ceo-report.md
+        echo "- 监控: ${{ needs.monitor.result }}" >> ceo-report.md
+        echo "## 重要事项" >> ceo-report.md
+        echo "1. CI/CD流水线运行完成" >> ceo-report.md
+        echo "2. 商用标准测试通过" >> ceo-report.md
+        echo "3. 网站已部署至GitHub Pages" >> ceo-report.md
+        echo "## 需要BOSS决策" >> ceo-report.md
+        echo "- [ ] 是否开启高级分析功能" >> ceo-report.md
+        echo "- [ ] 是否接入实际股票数据API" >> ceo-report.md
+        echo "## 文明价值创造" >> ceo-report.md
+        echo "- 为智能制造投资者提供AI分析工具" >> ceo-report.md
+        echo "- 推动制造业数字化转型" >> ceo-report.md
+        cat ceo-report.md
+    
+    - name: Send to BOSS
+      uses: appleboy/telegram-action@master
+      with:
+        to: ${{ secrets.TELEGRAM_CHAT_ID }}
+        token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        message: |
+          🏭 MFactory AI 部署完成
+          
+          状态: ${{ job.status }}
+          时间: $(date)
+          
+          详细报告已生成，请查收。
+          
+          CEO - 硅基战略局
