@@ -42,3 +42,44 @@ coverage/
 # OS files
 *.orig
 *~
+
+# 测试覆盖目录
+.nyc_output/
+
+# 构建产物
+.out/
+.next/
+
+# 环境变量 (additional)
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 日志文件
+logs/
+
+# 部署文件
+.deploy/
+.gh-pages/
+
+# 安全文件
+*.pem
+*.key
+*.crt
+
+# 文档生成
+docs/_build/
+
+# 性能测试报告
+lighthouse-report.json
+
+# 包锁文件（我们使用package-lock.json）
+yarn.lock
+pnpm-lock.yaml
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# Jest
+jest-cache/
